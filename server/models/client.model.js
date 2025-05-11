@@ -31,10 +31,16 @@ const clientSchema = new Schema({
     type: String,
     required: [true, "{PATH} est requis!"],
     minLength: [8, "{PATH} doit être au minimum 8 caractères!!"]
-  }
+  },
+  //* === SUPER ADMIN QUI APPROUVERA UN VENDEUR ===
+
+   estApprouvé: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
-// Virtual field for password confirmation
+//* Virtual field pour confirmer le mot de passe
 clientSchema.virtual('confirmMotsdePasse')
   .get(function () {
     return this._confirmMotsdePasse;
@@ -43,7 +49,7 @@ clientSchema.virtual('confirmMotsdePasse')
     this._confirmMotsdePasse = value;
   });
 
-// Password confirmation validation
+//* Vérification des mots de passe
 clientSchema.pre('validate', function (next) {
   if (this.motsdePasse !== this._confirmMotsdePasse) {
     this.invalidate('confirmMotsdePasse', "Les mots de passe doivent correspondre");
@@ -51,7 +57,7 @@ clientSchema.pre('validate', function (next) {
   next();
 });
 
-// Password hashing before saving
+//* Hash du mot de passe + forcer la validation pour le rôle admin
 clientSchema.pre('save', async function (next) {
   if (this.isModified('motsdePasse')) {
     try {
@@ -61,6 +67,12 @@ clientSchema.pre('save', async function (next) {
       return next(error);
     }
   }
+
+  //* Un admin nouvellement inscrit n'est jamais approuvé par défaut
+  if (this.role === "admin") {
+    this.estApprouvé = false;
+  }
+
   next();
 });
 

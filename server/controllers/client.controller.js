@@ -14,20 +14,21 @@ const clientController = {
             const client = new Client(req.body);
             const nouveauClient = await client.save();
             const tokenClient = jwt.sign({ id: nouveauClient._id }, SECRET);
-            console.log("Token du Client Inscrit : " + tokenClient, "+++++++++++++++++++++++++++");
-            console.log(nouveauClient);
             res.status(201)
                .cookie("clientToken", tokenClient, { httpOnly: true })
-            .json({ 
-                client: nouveauClient, 
-                token: tokenClient,      
-                message: "Inscription réussie" 
-            });
+               .json({ 
+                   client: nouveauClient,
+                   token: tokenClient,
+                   message: nouveauClient.role === "admin"
+                       ? "Demande d'inscription en tant qu'admin envoyée. En attente d'approbation."
+                       : "Inscription réussie"
+               });
         } catch (error) {
             console.error(error);
             res.status(400).json(error.errors);
         }
     },
+
 
     //! Connexion d’un client existant
     connexionClient: async (req, res) => {
@@ -44,9 +45,11 @@ const clientController = {
                 return res.status(400).json({ message: "Mot de passe incorrect" });
             }
 
-            const tokenClient = jwt.sign({ id: clientDepuisBD._id }, SECRET);
-            console.log("Token du Client Connecté : " + tokenClient, "-------------------");
+            if (clientDepuisBD.role === "admin" && !clientDepuisBD.estApprouvé) {
+                return res.status(403).json({ message: "Votre compte admin n’est pas encore approuvé." });
+            }
 
+            const tokenClient = jwt.sign({ id: clientDepuisBD._id }, SECRET);
             res.status(200)
                .cookie("clientToken", tokenClient, { httpOnly: true })
                .json({ client: clientDepuisBD, message: "Connexion réussie", token: tokenClient });
@@ -67,6 +70,25 @@ const clientController = {
     getClientConnecté: async (req, res) => {
         console.log("Headers de la requête :", req.headers);
         res.json({ message: "Client actuellement connecté" });
+    },
+
+     //! Approbation d’un admin par un superAdmin
+    approuverAdmin: async (req, res) => {
+        try {
+            const client = await Client.findById(req.params.id);
+            if (!client) return res.status(404).json({ message: "Client introuvable" });
+
+            if (client.role !== "admin") {
+                return res.status(400).json({ message: "Ce client n'est pas un admin à approuver" });
+            }
+
+            client.estApprouvé = true;
+            await client.save();
+
+            res.json({ message: "Admin approuvé avec succès", client });
+        } catch (error) {
+            res.status(500).json({ message: "Erreur lors de l'approbation", error });
+        }
     }
 };
 

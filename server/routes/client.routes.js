@@ -1,5 +1,6 @@
 import clientController from "../controllers/client.controller.js";
 import { Router } from "express";
+import verifierSuperAdmin from "../middlewares/verifierSuperAdmin.js";
 
 
 const clientRouter = Router()
@@ -12,5 +13,8 @@ clientRouter.route("/inscription").post(clientController.inscriptionClient)
 clientRouter.route("/connexion").post(clientController.connexionClient)
 //! 3. Route pour la Déconnexion du Client
 clientRouter.route("/deconnexion").post(clientController.deconnexionClient)
+
+//! ⚠️ Ajouter cette route pour que le superAdmin approuve un admin :
+clientRouter.put("/clients/:id/approuver", verifierSuperAdmin, clientController.approuverAdmin);
 
 export default clientRouter;

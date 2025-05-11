@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 
 
 //* Import the router from the routes folder
@@ -13,7 +14,12 @@ import clientRouter from './routes/client.routes.js';
 const app = express()
 
 //* Configure the middlewares
-app.use(express.json(), cors());
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'http://localhost:5173', 
+    credentials: true           
+}));
 
 
 //* Load the server port from environment variables
