@@ -14,7 +14,7 @@ clientRouter.route("/connexion").post(clientController.connexionClient)
 //! 3. Route pour la Déconnexion du Client
 clientRouter.route("/deconnexion").post(clientController.deconnexionClient)
 
-//! ⚠️ Ajouter cette route pour que le superAdmin approuve un admin :
+//! 4. Ajouter cette route pour que le superAdmin approuve un admin ⚠️:
 clientRouter.put("/clients/:id/approuver", verifierSuperAdmin, clientController.approuverAdmin);
 
 export default clientRouter;

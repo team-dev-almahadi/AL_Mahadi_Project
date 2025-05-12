@@ -16,7 +16,7 @@ const clientSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ["superAdmin", "client", "admin"],
+    enum: ["superAdmin", "client", "admin", "vendeurs"],
     default: "client"
   },
   email: {
@@ -69,7 +69,7 @@ clientSchema.pre('save', async function (next) {
   }
 
   //* Un admin nouvellement inscrit n'est jamais approuvé par défaut
-  if (this.role === "admin") {
+  if (this.role === "admin" && this.role == "vendeurs") {
     this.estApprouvé = false;
   }
 

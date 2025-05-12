@@ -89,7 +89,25 @@ const clientController = {
         } catch (error) {
             res.status(500).json({ message: "Erreur lors de l'approbation", error });
         }
-    }
+    },
+    //! Approbation d'un vendeur Par le Super Admin:
+    approuverVendeur: async (req, res) => {
+        try {
+            const client = await Client.findById(req.params.id);
+            if (!client) return res.status(404).json({ message: "Client introuvable" });
+
+            if (client.role !== "vendeurs") {
+                return res.status(400).json({ message: "Ce client n'est pas un vendeur à approuver" });
+            }
+
+            client.estApprouvé = true;
+            await client.save();
+            res.json({ message: "Vendeur approuvé avec succès", client });
+        } catch (error) {
+            res.status(500).json({ message: "Erreur lors de l'approbation", error });
+        }
+    },
+
 };
 
 export default clientController;
