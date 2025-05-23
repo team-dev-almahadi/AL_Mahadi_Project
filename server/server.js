@@ -7,6 +7,8 @@ import cookieParser from 'cookie-parser';
 
 //* Import the router from the routes folder
 import dbConnect from './config/mongoose.config.js';
+// import clientRouter from './routes/client.routes.js';
+import router from './routes/index.js';
 import clientRouter from './routes/client.routes.js';
 
 
@@ -32,7 +34,7 @@ const PORT = process.env.PORT;
 
 //* Connect to the MONGODB database
 dbConnect();
-
+ app.use('/api/v1/almahadi', router);
 //* Add main routes for app running
 app.use("/api/v1/client", clientRouter);  //* Nom de domaine de l'API du client
 
